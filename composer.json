@@ -1,0 +1,12 @@
+{
+	"name": "cptechinc/dpluso-sapconcur",
+    "type": "library",
+    "description": "Classes for Dplus Online",
+    "keywords": ["crm"],
+    "homepage": "http://github.com/cptechinc/dplus-sap-concur",
+	"autoload": {
+		"psr-4": {
+	        "dplus\\sapconcur\\": "src/"
+	    }
+	}
+}
