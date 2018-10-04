@@ -1,5 +1,5 @@
 {
-	"name": "cptechinc/dpluso-sapconcur",
+	"name": "cptechinc/dplus-sapconcur",
     "type": "library",
     "description": "Classes for SAP Concur Integration into Dplus",
     "keywords": ["dplus-concur", "dplus-sap-concur", "sap-concur"],
