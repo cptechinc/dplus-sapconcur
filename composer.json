@@ -1,9 +1,26 @@
 {
 	"name": "cptechinc/dpluso-sapconcur",
     "type": "library",
-    "description": "Classes for Dplus Online",
-    "keywords": ["crm"],
-    "homepage": "http://github.com/cptechinc/dplus-sap-concur",
+    "description": "Classes for SAP Concur Integration into Dplus",
+    "keywords": ["dplus-concur", "dplus-sap-concur", "sap-concur"],
+	"homepage": "http://github.com/cptechinc/dplus-sap-concur",
+	"authors": [
+        {
+            "name": "Paul Gomez",
+            "email": "paul@cptechinc.com",
+            "homepage": "https://www.cptechinc.com",
+            "role": "Developer"
+        },
+        {
+            "name": "Barbara Bullemer",
+            "email": "barbara@cptechinc.com",
+            "homepage": "https://www.cptechinc.com",
+            "role": "Developer"
+        }
+    ],
+	"require": {
+		"jwage/purl": "dev-cptechinc"
+	},
 	"autoload": {
 		"psr-4": {
 	        "dplus\\sapconcur\\": "src/"
