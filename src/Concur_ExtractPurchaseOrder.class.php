@@ -1,9 +1,9 @@
 <?php 
+    namespace dplus\sapconcur;
+
 	/**
 	 * Class to handle dealing with List Items
 	 */
-	namespace dplus\sapconcur;
-	
 	class Concur_ExtractPurchaseOrder extends Concur_Extract {
         /**
          * Extract Endpoint

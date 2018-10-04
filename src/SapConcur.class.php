@@ -5,8 +5,8 @@
 	 */
 	
 	abstract class Concur_Endpoint {
-		use \MagicMethodTraits;
-		use \ThrowErrorTrait;
+		use \dplus\base\MagicMethodTraits;
+		use \dplus\base\ThrowErrorTrait;
 		
 		/**
 		 * List of URL Endpoints
