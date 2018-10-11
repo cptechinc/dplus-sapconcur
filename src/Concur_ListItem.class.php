@@ -1,5 +1,5 @@
 <?php 
-	namespace dplus\sapconcur;
+	namespace Dplus\SapConcur;
 	
 	/**
 	 * Class to handle dealing with List Items

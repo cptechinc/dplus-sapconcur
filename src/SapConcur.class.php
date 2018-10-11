@@ -1,12 +1,12 @@
 <?php 
-	namespace dplus\sapconcur;
+	namespace Dplus\SapConcur;
 	/**
 	 * Template Class to build endpoint classes from and extend
 	 */
 	
 	abstract class Concur_Endpoint {
-		use \dplus\base\MagicMethodTraits;
-		use \dplus\base\ThrowErrorTrait;
+		use \Dplus\Base\MagicMethodTraits;
+		use \Dplus\Base\ThrowErrorTrait;
 		
 		/**
 		 * List of URL Endpoints
@@ -27,7 +27,7 @@
 		protected $request;
 		
 		protected function curl_post($url, $body) {
-			$curl = new Curl();
+			$curl = new \Dplus\Base\Curl();
 			$curl->add_acceptheader('json');
 			$curl->set_contenttype('url');
 			$curl->set_authentication('oauth2');
@@ -62,7 +62,7 @@
 		 * @return array        Response from Endpoint or response from cURL
 		 */
 		protected function curl_put($url, $body) {
-			$curl = new Curl();
+			$curl = new \Dplus\Base\Curl();
 			$curl->add_acceptheader('json');
 			$curl->set_contenttype('url');
 			$curl->set_authentication('oauth2');
@@ -97,7 +97,7 @@
 		 * @return array        Response from Endpoint or response from cURL
 		 */
 		protected function curl_get($url, $body = '') {
-			$curl = new Curl();
+			$curl = new \Dplus\Base\Curl();
 			$curl->add_acceptheader('json');
 			$curl->set_contenttype('url');
 			$curl->set_authentication('oauth2');
@@ -112,7 +112,7 @@
 		 * @return array        Response from Endpoint or response from cURL
 		 */
 		protected function curl_getcsv($url, $body = '') {
-			$curl = new Curl();
+			$curl = new \Dplus\Base\Curl();
 			$curl->add_acceptheader('csv');
 			$curl->set_contenttype('url');
 			$curl->set_authentication('oauth2');
@@ -209,7 +209,7 @@
 			$date = date("Y-m-d h:m:s");
 			$class = get_class($this);
 			$message = "[{$date}] [{$class}] $error";
-			DplusWire::wire('log')->save('sap-errors', $message);
+			\DplusWire::wire('log')->save('sap-errors', $message);
 		}
 		
 		/**

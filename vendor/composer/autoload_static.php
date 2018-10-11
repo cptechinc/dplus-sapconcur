@@ -7,17 +7,32 @@ namespace Composer\Autoload;
 class ComposerStaticInit7314f3e3bbf4b468cf3e29ab477e27c7
 {
     public static $prefixLengthsPsr4 = array (
-        'd' => 
+        'D' => 
         array (
-            'dplus\\sapconcur\\' => 16,
+            'Dplus\\SapConcur\\' => 16,
         ),
     );
 
     public static $prefixDirsPsr4 = array (
-        'dplus\\sapconcur\\' => 
+        'Dplus\\SapConcur\\' => 
         array (
             0 => __DIR__ . '/../..' . '/src',
         ),
+    );
+
+    public static $classMap = array (
+        'Dplus\\SapConcur\\ConcurFactory' => __DIR__ . '/../..' . '/src/ConcurFactory.class.php',
+        'Dplus\\SapConcur\\Concur_Authentication' => __DIR__ . '/../..' . '/src/Concur_Authentication.class.php',
+        'Dplus\\SapConcur\\Concur_Endpoint' => __DIR__ . '/../..' . '/src/SapConcur.class.php',
+        'Dplus\\SapConcur\\Concur_Extract' => __DIR__ . '/../..' . '/src/Concur_Extract.class.php',
+        'Dplus\\SapConcur\\Concur_ExtractPurchaseOrder' => __DIR__ . '/../..' . '/src/Concur_ExtractPurchaseOrder.class.php',
+        'Dplus\\SapConcur\\Concur_Invoice' => __DIR__ . '/../..' . '/src/Concur_Invoice.class.php',
+        'Dplus\\SapConcur\\Concur_ListItem' => __DIR__ . '/../..' . '/src/Concur_ListItem.class.php',
+        'Dplus\\SapConcur\\Concur_ListItemInventory' => __DIR__ . '/../..' . '/src/Concur_ListItemInventory.class.php',
+        'Dplus\\SapConcur\\Concur_PurchaseOrder' => __DIR__ . '/../..' . '/src/Concur_PurchaseOrder.class.php',
+        'Dplus\\SapConcur\\Concur_PurchaseOrderReceipts' => __DIR__ . '/../..' . '/src/Concur_PurchaseOrderReceipts.class.php',
+        'Dplus\\SapConcur\\Concur_Vendor' => __DIR__ . '/../..' . '/src/Concur_Vendor.class.php',
+        'Dplus\\SapConcur\\StructuredClassTraits' => __DIR__ . '/../..' . '/src/traits/StructuredClass.trait.php',
     );
 
     public static function getInitializer(ClassLoader $loader)
@@ -25,6 +40,7 @@ class ComposerStaticInit7314f3e3bbf4b468cf3e29ab477e27c7
         return \Closure::bind(function () use ($loader) {
             $loader->prefixLengthsPsr4 = ComposerStaticInit7314f3e3bbf4b468cf3e29ab477e27c7::$prefixLengthsPsr4;
             $loader->prefixDirsPsr4 = ComposerStaticInit7314f3e3bbf4b468cf3e29ab477e27c7::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInit7314f3e3bbf4b468cf3e29ab477e27c7::$classMap;
 
         }, null, ClassLoader::class);
     }

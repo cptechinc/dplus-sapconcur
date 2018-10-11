@@ -1,12 +1,12 @@
 <?php 
-	namespace dplus\sapconcur;
+	namespace Dplus\SapConcur;
 	
 	/**
 	 * Factory to instatiate Concur Endpoint classes, also provides them with the Access token needed
 	 */
 	Class ConcurFactory {
-		use \dplus\base\MagicMethodTraits;
-		use \dplus\base\ThrowErrorTrait;
+		use \Dplus\Base\MagicMethodTraits;
+		use \Dplus\Base\ThrowErrorTrait;
 		
 		/**
 		 * Is there an Error

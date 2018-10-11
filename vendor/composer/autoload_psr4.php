@@ -6,5 +6,5 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
-    'dplus\\sapconcur\\' => array($baseDir . '/src'),
+    'Dplus\\SapConcur\\' => array($baseDir . '/src'),
 );

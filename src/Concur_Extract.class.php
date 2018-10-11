@@ -1,8 +1,8 @@
 <?php 
+	namespace Dplus\SapConcur;
 	/**
 	 * Class to handle dealing with List Items
 	 */
-	namespace dplus\sapconcur;
 	class Concur_Extract extends Concur_Endpoint {
 		use StructuredClassTraits;
         

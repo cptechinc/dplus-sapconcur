@@ -1,5 +1,5 @@
 <?php 
-	namespace dplus\sapconcur;
+	namespace Dplus\SapConcur;
 	
 	/**
 	 * Adds definition of Properties and functions needed
