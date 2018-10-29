@@ -20,7 +20,7 @@
     ],
 	"require": {
         "jwage/purl": "dev-cptechinc",
-        "cptechinc/dplus-base": "dev-psr4"
+        "cptechinc/dplus-base": "dev-master"
 	},
 	"autoload": {
 		"psr-4": {
