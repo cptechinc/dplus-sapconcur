@@ -101,42 +101,22 @@
 		 * @return array         Response for each PO Number Keyed by Purchase Order Number
 		 */
 		public function batch_purchaseorders($limit = 0, $ponbr = '') {
-			$response = array('created' => array(), 'updated' => array());
-			$purchaseorders = get_dbpurchaseordernbrs($limit, $ponbr);
-			$separatedponbrs = $this->separate_purchaseorders($purchaseorders);
+			$responses = array('created' => array(), 'updated' => array());
+			$purchaseorders_new = get_dbpurchaseordernbrsnotinsendlog();
+			$purchaseorders_existing = get_dbpurchaseordernbrsinsendlog();
 			
-			foreach ($separatedponbrs['new'] as $ponbr) {
-				$this->create_purchaseorder($ponbr);
-				$response['created'][$ponbr] = $this->response;
+			foreach ($purchaseorders_new as $ponbr) {
+				$po_response = $this->create_purchaseorder($ponbr);
+				$category = $po_response['error'] ? 'error' : 'success';
+				$responses['created'][$category][$ponbr] = $po_response;
 			}
 			
-			foreach ($separatedponbrs['existing'] as $ponbr) {
-				$this->update_purchaseorder($ponbr);
-				$response['updated'][$ponbr] = $this->response;
+			foreach ($purchaseorders_existing as $ponbr) {
+				$po_response = $this->update_purchaseorder($ponbr);
+				$category = $po_response['error'] ? 'error' : 'success';
+				$responses['updated'][$category][$ponbr] = $po_response;
 			}
-			$this->response = $response;
-			return $this->response;
-		}
-		
-		/**
-		 * Batch Processes an array of Purchase Orders
-		 * and IF they are new or existing we update them or create them
-		 * @param array $purchaseorders Purchase Order Numbers
-		 */
-		public function add_specificpurchaseorders($purchaseorders) {
-			$response = array('created' => array(), 'updated' => array());
-			$separatedponbrs = $this->separate_purchaseorders($purchaseorders);
-			
-			foreach ($separatedponbrs['new'] as $ponbr) {
-				$this->create_purchaseorder($ponbr);
-				$response['created'][$ponbr] = $this->response;
-			}
-			
-			foreach ($separatedponbrs['existing'] as $ponbr) {
-				$this->update_purchaseorder($ponbr);
-				$response['updated'][$ponbr] = $this->response;
-			}
-			$this->response = $response;
+			$this->response = $responses;
 			return $this->response;
 		}
 		
@@ -161,9 +141,9 @@
 		public function create_purchaseorder($ponbr) {
 			$purchaseorder = $this->create_purchaseorderheader($ponbr);
 			$purchaseorder['LineItem'] = $this->create_purchaseorderdetails($ponbr);
-			$this->response =  $this->post_curl($this->endpoints['purchase-order'], $purchaseorder, $json = true);
+			$this->response = $this->curl_post($this->endpoints['purchase-order'], $purchaseorder, $json = true);
 			$this->process_response();
-			return $this->response;
+			return $this->response['response'];
 		}
 		
 		/**
@@ -174,11 +154,10 @@
 		public function update_purchaseorder($ponbr) {
 			$purchaseorder = $this->create_purchaseorderheader($ponbr);
 			$purchaseorder['LineItem'] = $this->create_purchaseorderdetails($ponbr);
-			$this->response = $this->put_curl($this->endpoints['purchase-order'], $purchaseorder, $json = true);
+			$this->response = $this->curl_put($this->endpoints['purchase-order'], $purchaseorder, $json = true);
 			$this->process_response();
-			return $this->response;
+			return $this->response['response'];
 		}
-		
 		
 		/* =============================================================
 			ERROR CODES AND POSSIBLE SOLUTIONS
@@ -199,36 +178,36 @@
 		 * @return void
 		 */
 		protected function process_response() {
-			$this->response['Status'] = isset($this->response['Status']) ? $this->response['Status'] : '';
-			$this->response['Message'] = isset($this->response['Message']) ? $this->response['Message'] : '';
+			$this->response['response']['Status'] = isset($this->response['response']['Status']) ? $this->response['response']['Status'] : '';
+			$this->response['response']['Message'] = isset($this->response['response']['Message']) ? $this->response['response']['Message'] : '';
 			
-			if (isset($this->response['error']) || $this->response['Status'] == 'FAILURE') {
-				$error = !empty($this->response['ErrorCode']) ? "ErrorCode: " . $this->response['ErrorCode'] . " -> " : '';
-				$error .= !empty($this->response['ErrorMessage']) ? $this->response['ErrorMessage'] : $this->response['Message'];
+			if (isset($this->response['response']['error']) || $this->response['response']['Status'] == 'FAILURE') {
+				$error = !empty($this->response['response']['ErrorCode']) ? "ErrorCode: " . $this->response['response']['ErrorCode'] . " -> " : '';
+				$error .= !empty($this->response['response']['ErrorMessage']) ? $this->response['response']['ErrorMessage'] : $this->response['response']['Message'];
 				$error .= " -> ";
-				$error .= !empty($this->response['FieldCode']) ? "FieldCode: " . $this->response['FieldCode'] : '';
+				$error .= !empty($this->response['response']['FieldCode']) ? "FieldCode: " . $this->response['response']['FieldCode'] : '';
 				$this->log_error($error);
-			} elseif (strpos(strtolower($response['Message']), strtolower('Purchase Order Cannot be updated as it does not exist in system')) !== false) {
+			} elseif (strpos(strtolower($response['response']['Message']), strtolower('Purchase Order Cannot be updated as it does not exist in system')) !== false) {
 				$error = $response['Message'];
 				$this->log_error($error);
+			} else {
+				$this->log_sendlogpo($this->response['response']['PurchaseOrderNumber']);
 			}
 		}
 		
 		/**
-		 * Separates Purchase orders into 2 arrays, Existing and New
-		 * @param  array $purchaseorders  Purchase Order Numbers
-		 * @return array                  array('existing' => {Existing PO Numbers}, 'new' => {New PO Numbers})
+		 * Adds or Updates send log for an Purchaser Order
+		 * @param  string $ponbr Purchase Order Number
+		 * @return bool          Was PO Able to be added / updated in the send log
 		 */
-		public function separate_purchaseorders($purchaseorders) {
-			$response = array('existing' => array(), 'new' => array());
-			
-			foreach ($purchaseorders as $ponbr) {
-				$category = $this->does_concurpoexist($ponbr) ? 'existing' : 'new';
-				$response[$category][] = $ponbr;
+		protected function log_sendlogpo($ponbr) {
+			if (does_pohavesendlog($ponbr)) {
+				return update_sendlogpo($ponbr, date('Y-m-d H:i:s'));
+			} else {
+				return insert_sendlogpo($ponbr, date('Y-m-d H:i:s'));
 			}
-			$this->response = $response;
-			return $this->response;
 		}
+		
 		
 		/**
 		 * Gets Purchase Order header from Database and apply it to the structure needed

@@ -52,7 +52,7 @@
 		 */
 		public function create_endpoint($endpoint) {
 			if (in_array($endpoint, array_keys($this->endpoints))) {
-				$class = $this->endpoints[$endpoint];
+				$class = "Dplus\SapConcur\\".$this->endpoints[$endpoint];
 				return new $class();
 			} else {
 				$this->error("Endpoint $endpoint does not exist");

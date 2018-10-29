@@ -48,7 +48,6 @@
 				'password' => $appconfig->concur_password,
 				'credtype '=>'password',
 			];
-			
 			$this->response = $this->curl_post($this->endpoints['authentication'], $body);
 			$this->accesstoken = $this->response['server']['error'] ? false : $this->response['response']['access_token'];
 			self::$authtoken = $this->response['server']['error'] ? false : $this->response['response']['access_token'];

@@ -51,7 +51,7 @@
 		 * @return array      Response from Concur
 		 */
 		public function get_list($id) {
-			$url = new Purl\Url($this->endpoints['list-items']);
+			$url = new \Purl\Url($this->endpoints['list-items']);
             $url->query->set('listID', $id);
 			return $this->get_curl($url->getUrl());
 		}
@@ -76,9 +76,9 @@
         public function create_listitem(string $listID, array $item) {
             $listitem = $this->structure_concuritem($item);
 			$this->request = $listitem;
-            $this->response = $this->post_curl($this->endpoints['list-items'], $listitem, $json = true);
+            $this->response = $this->curl_post($this->endpoints['list-items'], $listitem, $json = true);
 			$this->process_response();
-			return $this->response;
+			return $this->response['response'];
         }
         
         /**
@@ -90,10 +90,12 @@
         public function update_listitem(string $listID, array $item) {
             $listitem = $this->structure_concuritem($item);
 			$this->request = $listitem;
-            $this->response = $this->put_curl($this->endpoints['list-items'] . "/$listID", $listitem, $json = true);
+            $this->response = $this->curl_put($this->endpoints['list-items'] . "/$listID", $listitem, $json = true);
 			$this->process_response();
-			return $this->response;
+			return $this->response['response'];
         }
+		
+		
 		
 		
         

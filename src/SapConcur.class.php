@@ -26,6 +26,12 @@
 		 */
 		protected $request;
 		
+		/**
+		 * Sends POST cURL request
+		 * @param  string $url  URL to make request to
+		 * @param  array  $body Key Value array to send
+		 * @return array        Response from Endpoint or response from cURL
+		 */
 		protected function curl_post($url, $body) {
 			$curl = new \Dplus\Base\Curl();
 			$curl->add_acceptheader('json');
@@ -33,26 +39,6 @@
 			$curl->set_authentication('oauth2');
 			$curl->authentication->set_accesstoken($this->get_accesstoken());
 			return $curl->post($url, $body);
-		}
-		
-		/**
-		 * Sends POST cURL request
-		 * @param  string $url  URL to make request to
-		 * @param  array  $body Key Value array to send
-		 * @param  bool   $json Send body as JSON?
-		 * @return array        Response from Endpoint or response from cURL
-		 */
-		protected function post_curl($url, $body, $json = false) {
-			$headers = $this->generate_defaultcurlheader();
-			
-			if ($json) {
-				$headers[] = 'Content-type: application/json';
-				$body = json_encode($body);
-			}
-			
-			$curl = $this->get_defaultcurl($url, $headers);
-			curl_setopt($curl, CURLOPT_POSTFIELDS, $body);
-			return $this->execute_andgetresponse($curl);
 		}
 		
 		/**
@@ -68,26 +54,6 @@
 			$curl->set_authentication('oauth2');
 			$curl->authentication->set_accesstoken($this->get_accesstoken());
 			return $curl->put($url, $body);
-		}
-		/**
-		 * Sends PUT cURL request
-		 * @param  string $url  URL to make request to
-		 * @param  array  $body Key Value array to send
-		 * @param  bool   $json Send body as JSON?
-		 * @return array        Response from Endpoint or response from cURL
-		 */
-		protected function put_curl($url, $body, $json = false) {
-			$headers = $this->generate_defaultcurlheader();
-			
-			if ($json) {
-				$headers[] = 'Content-type: application/json';
-				$body = json_encode($body);
-			}
-			
-			$curl = $this->get_defaultcurl($url, $headers);
-			curl_setopt($curl, CURLOPT_POSTFIELDS, $body);
-			curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "PUT");
-			return $this->execute_andgetresponse($curl);
 		}
 		
 		/**
