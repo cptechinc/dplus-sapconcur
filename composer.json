@@ -20,7 +20,8 @@
     ],
 	"require": {
         "jwage/purl": "dev-cptechinc",
-        "cptechinc/dplus-base": "dev-master"
+        "cptechinc/dplus-base": "dev-master",
+        "phpoffice/phpspreadsheet": "dev-master"
 	},
 	"autoload": {
 		"psr-4": {
