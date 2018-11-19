@@ -6,4 +6,16 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
+    'Dplus\\SapConcur\\ConcurFactory' => $baseDir . '/src/ConcurFactory.class.php',
+    'Dplus\\SapConcur\\Concur_Authentication' => $baseDir . '/src/Concur_Authentication.class.php',
+    'Dplus\\SapConcur\\Concur_Endpoint' => $baseDir . '/src/SapConcur.class.php',
+    'Dplus\\SapConcur\\Concur_Extract' => $baseDir . '/src/Concur_Extract.class.php',
+    'Dplus\\SapConcur\\Concur_ExtractPurchaseOrder' => $baseDir . '/src/Concur_ExtractPurchaseOrder.class.php',
+    'Dplus\\SapConcur\\Concur_Invoice' => $baseDir . '/src/Concur_Invoice.class.php',
+    'Dplus\\SapConcur\\Concur_ListItem' => $baseDir . '/src/Concur_ListItem.class.php',
+    'Dplus\\SapConcur\\Concur_ListItemInventory' => $baseDir . '/src/Concur_ListItemInventory.class.php',
+    'Dplus\\SapConcur\\Concur_PurchaseOrder' => $baseDir . '/src/Concur_PurchaseOrder.class.php',
+    'Dplus\\SapConcur\\Concur_PurchaseOrderReceipts' => $baseDir . '/src/Concur_PurchaseOrderReceipts.class.php',
+    'Dplus\\SapConcur\\Concur_Vendor' => $baseDir . '/src/Concur_Vendor.class.php',
+    'Dplus\\SapConcur\\StructuredClassTraits' => $baseDir . '/src/traits/StructuredClass.trait.php',
 );
