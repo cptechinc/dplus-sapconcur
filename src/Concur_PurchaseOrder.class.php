@@ -1,6 +1,8 @@
 <?php 
 	namespace Dplus\SapConcur;
 	
+	use Dplus\Base\StringerBell;
+	
 	/**
 	 * Class to handle dealing with Purchase Orders
 	 */
@@ -21,14 +23,14 @@
 					'Address1'          => array('dbcolumn' => 'billtoAddress1', 'required' => false),
 					'Address2'          => array('dbcolumn' => 'billtoAddress2', 'required' => false),
 					'Address3'          => array('dbcolumn' => 'billtoAddress3', 'required' => false),
-					'City'              => array('dbcolumn' => 'billtoCity', 'required' => false),
+					'City'              => array('dbcolumn' => 'billtoCity', 'required' => false, 'default' => 'N/A'),
 					'CountryCode'       => array('dbcolumn' => 'billtoCountryCode', 'required' => false),
 					'ExternalID'        => array('dbcolumn' => 'billtoID', 'required' => false),
 					'Name'              => array('dbcolumn' => 'billtoName', 'required' => false),
 					'PostalCode'        => array('dbcolumn' => 'billtoZip', 'required' => false),
 					'StateProvince'     => array('dbcolumn' => 'billtoState', 'required' => false)
 				),
-				'CurrencyCode'        => array('dbcolumn' => '', 'required' => false),
+				'CurrencyCode'        => array('dbcolumn' => '', 'required' => false, 'auto' => 'USD'),
 				'OrderDate'           => array('dbcolumn' => '', 'required' => false, 'format' => 'date', 'date-format' => 'Y-m-d'),
 				'ID'                  => array('dbcolumn' => 'PurchaseOrderNumber', 'required' => false),
 				'LedgerCode'          => array('dbcolumn' => '', 'required' => false),
@@ -36,15 +38,15 @@
 				'PolicyExternalID'    => array('dbcolumn' => '', 'required' => false),
 				'PurchaseOrderNumber' => array('dbcolumn' => '', 'required' => false),
 				'ShipToAddress' => array(
-					'Address1'      => array('dbcolumn' => 'shiptoAddress1', 'required' => false),
-					'Address2'      => array('dbcolumn' => 'shiptoAddress2', 'required' => false),
-					'City'          => array('dbcolumn' => 'shiptoCity', 'required' => false),
-					'CountryCode'   => array('dbcolumn' => 'shiptoCountryCode', 'required' => false),
+					'Address1'      => array('dbcolumn' => 'shiptoAddress1', 'required' => false, 'default' => 'N/A'),
+					'Address2'      => array('dbcolumn' => 'shiptoAddress2', 'required' => false, 'default' => 'N/A'),
+					'City'          => array('dbcolumn' => 'shiptoCity', 'required' => false, 'default' => 'N/A'),
+					'CountryCode'   => array('dbcolumn' => 'shiptoCountryCode', 'required' => false, 'default' => 'N/A'),
 					'ExternalID'    => array('dbcolumn' => 'shiptoID', 'required' => false),
 					'Name'          => array('dbcolumn' => 'shiptoName', 'required' => false),
-					'PostalCode'    => array('dbcolumn' => 'shiptoZip', 'required' => false),
-					'State'         => array('dbcolumn' => 'shiptoState', 'required' => false),
-					'StateProvince' => array('dbcolumn' => 'shiptoState', 'required' => false)
+					'PostalCode'    => array('dbcolumn' => 'shiptoZip', 'required' => false, 'default' => 'N/A'),
+					'State'         => array('dbcolumn' => 'shiptoState', 'required' => false, 'default' => 'N/A'),
+					'StateProvince' => array('dbcolumn' => 'shiptoState', 'required' => false, 'default' => 'N/A')
 				),
 				'VendorCode'        => array('dbcolumn' => 'vendorID', 'required' => false),
 				'VendorAddressCode' => array('dbcolumn' => 'vendorID', 'required' => false),
@@ -65,6 +67,16 @@
 				'Custom7'                   => array('dbcolumn' => 'ItemID', 'required' => false),
 			)
 		);
+		
+		/**
+		 * Partial Error Responses to look validate Errors against
+		 * @var array
+		 */
+		protected $error_responses = array(
+			'exists'         => 'Purchase Order Cannot be created as it does exist in system',
+			'does-not-exist' => 'Purchase Order Cannot be updated as it does not exist in system'
+		);
+		
 		/* =============================================================
 			EXTERNAL / PUBLIC FUNCTIONS
 		============================================================ */
@@ -101,28 +113,61 @@
 		 * @return array         Response for each PO Number Keyed by Purchase Order Number
 		 */
 		public function batch_purchaseorders($limit = 0, $ponbr = '') {
+			$original_limit = $limit;
 			$responses = array('created' => array(), 'updated' => array());
-			$purchaseorders_new = get_dbpurchaseordernbrsnotinsendlog();
-			$purchaseorders_existing = get_dbpurchaseordernbrsinsendlog();
+			$nbr_new = count_dbpurchaseordernbrsnotinsendlog($ponbr);
+			$nbr_existing = count_dbpurchaseordernbrsinsendlog($ponbr);
 			
-			foreach ($purchaseorders_new as $ponbr) {
-				$po_response = $this->create_purchaseorder($ponbr);
-				$category = $po_response['error'] ? 'error' : 'success';
-				$responses['created'][$category][$ponbr] = $po_response;
+			$responses['created'] = $this->create_purchaseorders($limit, $ponbr);
+			$limit = max($limit - $nbr_new, 0);
+			
+			if ($limit > 0 || $original_limit == 0) {
+				$responses['updated'] = $this->update_purchaseorders($limit, $ponbr);
 			}
+			
+			$this->response = $responses;
+			return $this->response;
+		}
+		
+		/**
+		 * Updates Purchase Orders
+		 * @param  int    $limit Number of Purchase Orders to update
+		 * @param  string $ponbr Purchase Order Number to start with
+		 * @return array         Concur Purchase Orders Update responses
+		 */
+		public function update_purchaseorders($limit = 0, $ponbr = '') {
+			$responses = array();
+			$purchaseorders_existing = get_dbpurchaseordernbrsinsendlog($limit, $ponbr);
 			
 			foreach ($purchaseorders_existing as $ponbr) {
 				$po_response = $this->update_purchaseorder($ponbr);
-				$category = $po_response['error'] ? 'error' : 'success';
-				$responses['updated'][$category][$ponbr] = $po_response;
+				$result = $po_response['error'] ? 'error' : 'success';
+				$responses[$result][$ponbr] = $po_response;
 			}
-			$this->response = $responses;
-			return $this->response;
+			return $responses;
+		}
+		
+		/**
+		 * Creates Purchase Orders
+		 * @param  int    $limit Number of Purchase Orders to update
+		 * @param  string $ponbr Purchase Order Number to start with
+		 * @return array         Concur Purchase Orders Create responses
+		 */
+		public function create_purchaseorders($limit = 0, $ponbr = '') {
+			$responses = array();
+			$purchaseorders_new = get_dbpurchaseordernbrsnotinsendlog($limit, $ponbr); 
+			foreach ($purchaseorders_new as $ponbr) {
+				$po_response = $this->create_purchaseorder($ponbr);
+				$result = $po_response['error'] ? 'error' : 'success';
+				$responses[$result][$ponbr] = $po_response;
+			}
+			return $responses;
 		}
 		
 		/* =============================================================
 			CONCUR INTERFACE FUNCTIONS
 		============================================================ */
+		
 		/**
 		 * Verifies if Purchase Order Exists at Concur
 		 * @param  string $ponbr Purchase Order Number
@@ -142,6 +187,7 @@
 			$purchaseorder = $this->create_purchaseorderheader($ponbr);
 			$purchaseorder['LineItem'] = $this->create_purchaseorderdetails($ponbr);
 			$this->response = $this->curl_post($this->endpoints['purchase-order'], $purchaseorder, $json = true);
+			$this->response['response']['PurchaseOrderNumber'] = isset($this->response['response']['PurchaseOrderNumber']) ? $this->response['response']['PurchaseOrderNumber'] :  $purchaseorder['ID'];
 			$this->process_response();
 			return $this->response['response'];
 		}
@@ -155,6 +201,7 @@
 			$purchaseorder = $this->create_purchaseorderheader($ponbr);
 			$purchaseorder['LineItem'] = $this->create_purchaseorderdetails($ponbr);
 			$this->response = $this->curl_put($this->endpoints['purchase-order'], $purchaseorder, $json = true);
+			$this->response['response']['PurchaseOrderNumber'] = isset($this->response['response']['PurchaseOrderNumber']) ? $this->response['response']['PurchaseOrderNumber'] :  $purchaseorder['ID'];
 			$this->process_response();
 			return $this->response['response'];
 		}
@@ -178,18 +225,26 @@
 		 * @return void
 		 */
 		protected function process_response() {
-			$this->response['response']['Status'] = isset($this->response['response']['Status']) ? $this->response['response']['Status'] : '';
+			$stringer = new StringerBell();
+			
+			$this->response['response']['Status']  = isset($this->response['response']['Status'])  ? $this->response['response']['Status']  : '';
 			$this->response['response']['Message'] = isset($this->response['response']['Message']) ? $this->response['response']['Message'] : '';
 			
-			if (isset($this->response['response']['error']) || $this->response['response']['Status'] == 'FAILURE') {
+			
+			if (!empty($this->response['response']['error']) || $this->response['response']['Status'] == 'FAILURE') {
+				$this->response['response']['error'] = true;
 				$error = !empty($this->response['response']['ErrorCode']) ? "ErrorCode: " . $this->response['response']['ErrorCode'] . " -> " : '';
 				$error .= !empty($this->response['response']['ErrorMessage']) ? $this->response['response']['ErrorMessage'] : $this->response['response']['Message'];
 				$error .= " -> ";
 				$error .= !empty($this->response['response']['FieldCode']) ? "FieldCode: " . $this->response['response']['FieldCode'] : '';
 				$this->log_error($error);
-			} elseif (strpos(strtolower($response['response']['Message']), strtolower('Purchase Order Cannot be updated as it does not exist in system')) !== false) {
-				$error = $response['Message'];
-				$this->log_error($error);
+			} elseif ($stringer->contains($this->error_responses['does-not-exist'], $this->response['response']['Message'])) {
+				$this->response['response']['error'] = true;
+				$this->log_error($this->response['response']['Message']);
+			} elseif ($stringer->contains(strtolower($this->error_responses['exists']), strtolower($this->response['response']['Message']))) {
+				$this->response['response']['error'] = true;
+				$this->log_error($this->response['response']['Message']);
+				$this->log_sendlogpo($this->response['response']['PurchaseOrderNumber']);
 			} else {
 				$this->log_sendlogpo($this->response['response']['PurchaseOrderNumber']);
 			}
@@ -199,8 +254,9 @@
 		 * Adds or Updates send log for an Purchaser Order
 		 * @param  string $ponbr Purchase Order Number
 		 * @return bool          Was PO Able to be added / updated in the send log
+		 * // NOTE This is a public function because so Concur_ExtractPurchaseOrders can use this function
 		 */
-		protected function log_sendlogpo($ponbr) {
+		public function log_sendlogpo($ponbr) {
 			if (does_pohavesendlog($ponbr)) {
 				return update_sendlogpo($ponbr, date('Y-m-d H:i:s'));
 			} else {

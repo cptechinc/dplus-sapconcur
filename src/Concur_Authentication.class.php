@@ -1,6 +1,9 @@
 <?php 
 	namespace Dplus\SapConcur;
 	
+	use Dplus\ProcessWire\DplusWire;
+	use Dplus\Base\Curl;
+
 	/**
 	 * Class for getting Authentication through Concur's API
 	 */
@@ -28,7 +31,7 @@
 		 * @return array        Response from Endpoint or response from cURL
 		 */
 		protected function curl_post($url, $body) {
-			$curl = new \Dplus\Base\Curl();
+			$curl = new Curl();
 			$curl->add_acceptheader('json');
 			$curl->set_contenttype('url');
 			return $curl->post($url, $body);
@@ -39,7 +42,7 @@
 		 * @return array JSON Response
 		 */
 		public function create_authenticationtoken() {
-			$appconfig = \DplusWire::wire('pages')->get('/config/');
+			$appconfig = DplusWire::wire('pages')->get('/config/');
 			$body = [
 				'client_id' => $appconfig->client_id,
 				'client_secret' => $appconfig->client_secret,

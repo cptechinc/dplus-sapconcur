@@ -1,6 +1,7 @@
 <?php 
 	namespace Dplus\SapConcur;
-	use DplusWire;
+	
+	use Dplus\ProcessWire\DplusWire;
 	
 	/**
 	 * Class to handle dealing with List Items
@@ -67,6 +68,12 @@
 		 * @var string
 		 */
 		protected $file;
+		
+		/**
+		 * File Name
+		 * @var string
+		 */
+		protected $filename;
         
         /**
          * Gets the Information for $this->extract type
@@ -113,7 +120,8 @@
 		}
 		
 		public function write_extractfile() {
-			$vard = DplusWire::wire('config')->documentstoragedirectory . "$this->extract.txt";
+			$this->filename = "$this->extract.txt";
+			$vard = DplusWire::wire('config')->documentstoragedirectory . $this->filename;
 			$handle = fopen($vard, "w") or die("cant open file");
 			fwrite($handle, $this->file);
 			fclose($handle);

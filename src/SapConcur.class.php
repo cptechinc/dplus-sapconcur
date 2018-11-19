@@ -1,9 +1,11 @@
 <?php 
 	namespace Dplus\SapConcur;
+	
+	use Dplus\ProcessWire\DplusWire;
+	
 	/**
 	 * Template Class to build endpoint classes from and extend
 	 */
-	
 	abstract class Concur_Endpoint {
 		use \Dplus\Base\MagicMethodTraits;
 		use \Dplus\Base\ThrowErrorTrait;
@@ -175,7 +177,7 @@
 			$date = date("Y-m-d h:m:s");
 			$class = get_class($this);
 			$message = "[{$date}] [{$class}] $error";
-			\DplusWire::wire('log')->save('sap-errors', $message);
+			DplusWire::wire('log')->save('sap-errors', $message);
 		}
 		
 		/**

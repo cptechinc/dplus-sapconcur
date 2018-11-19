@@ -60,7 +60,7 @@
 			$field = !empty($fieldproperties['dbcolumn']) ? $fieldproperties['dbcolumn'] : $field;
 			$value = isset($values[$field]) ? $values[$field] : '';
 			return $this->format_value($value, $fieldproperties);
-        }
+		}
 		
 		/**
 		 * Returns the value from the values array, does not use the dbcolumn
@@ -71,7 +71,7 @@
 		 */
 		protected function get_dbvalue($values, $field, $fieldproperties) {
 			return $this->format_value($values[$field], $fieldproperties);
-        }
+		}
 		
 		/**
 		 * Formats the value of a field using the field properties array
@@ -81,16 +81,20 @@
 		 */
 		protected function format_value($value, $fieldproperties) {
 			if (isset($fieldproperties['format'])) {
-                switch ($fieldproperties['format']) {
-                    case 'date':
-                        $value = date($fieldproperties['date-format'], strtotime($this->clean_value($value)));
-                        break;
-                }
-            } elseif (isset($fieldproperties['strlen'])) {
+				switch ($fieldproperties['format']) {
+					case 'date':
+						$value = date($fieldproperties['date-format'], strtotime($this->clean_value($value)));
+						break;
+				}
+			} elseif (isset($fieldproperties['strlen'])) {
 				$value = substr($this->clean_value($value), 0, $fieldproperties['strlen']);
 			} else {
-                $value = $this->clean_value($value);
-            }
+				$value = $this->clean_value($value);
+			}
+			
+			if (isset($fieldproperties['auto'])) {
+				$value = $this->clean_value($fieldproperties['auto']);
+			}
 			
 			return (empty($value) && isset($fieldproperties['default'])) ? $fieldproperties['default'] : $value;
 		}
