@@ -31,9 +31,9 @@
 		public function add_receipt($ponbr, $linenumber) {
 			$receipt = get_dbreceipt($ponbr, $linenumber);
 			$data = $this->create_sectionarray($this->structure['header'], $receipt);
-			$this->response = $this->put_curl($this->endpoints['receipts'], $data, $json = true);
+			$this->response = $this->curl_put($this->endpoints['receipts'], $data, $json = true);
 			$this->process_response();
-			return $this->response;
+			return $this->response['response'];
 		}
 		
 		/**
@@ -59,14 +59,14 @@
 		 * @return array            array('failed' => $failed, 'ok' => $successful)
 		 */
 		public function sort_response($response) {
-			$sortedresponse = array('failed' => array(), 'ok' => array());
+			$sortedresponse = array('failed' => array(), 'success' => array());
 			
 			foreach ($response as $ponbr => $purchaselines) {
 				foreach ($purchaselines as $linenbr => $line) {
 					if ($this->did_detailfail($line)) {
 						$sortedresponse['failed'][$ponbr][$linenbr] = $line;
 					} else {
-						$sortedresponse['ok'][$ponbr][$linenbr] = $line;
+						$sortedresponse['success'][$ponbr][$linenbr] = $line;
 					}
 				}
 			}
@@ -116,14 +116,15 @@
 		 * @return void
 		 */
 		protected function process_response() {
-			if (!isset($this->response['Message'])) {
-				$this->response['Message'] = '';
+			if (!isset($this->response['response']['Message'])) {
+				$this->response['response']['Message'] = '';
 			}
-			if ($this->response['error'] || $this->response['Status'] == 'FAILURE') {
-				$error = !empty($this->response['ErrorCode']) ? "PO # ".$this->response['PurchaseOrderNumber'] . " -> ErrorCode: " . $this->response['ErrorCode'] . " -> " : '';
-				$error .= !empty($this->response['ErrorMessage']) ? $this->response['ErrorMessage'] : $this->response['Message'];
+			
+			if ($this->response['response']['error'] || $this->response['response']['Status'] == 'FAILURE') {
+				$error = !empty($this->response['response']['ErrorCode']) ? "PO # ".$this->response['response']['PurchaseOrderNumber'] . " -> ErrorCode: " . $this->response['response']['ErrorCode'] . " -> " : '';
+				$error .= !empty($this->response['response']['ErrorMessage']) ? $this->response['response']['ErrorMessage'] : $this->response['response']['Message'];
 				$error .= " -> ";
-				$error .= !empty($this->response['FieldCode']) ? "FieldCode: " . $this->response['FieldCode'] : '';
+				$error .= !empty($this->response['response']['FieldCode']) ? "FieldCode: " . $this->response['response']['FieldCode'] : '';
 				$this->log_error($error);
 			} 
 		}
