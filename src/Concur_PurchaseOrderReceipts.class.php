@@ -50,6 +50,7 @@
 				$response[$ponbr] = $this->add_receiptsforpo($ponbr);
 			}
 			$sortedresponse = $this->sort_response($response);
+			$sortedresponse['sql'] = get_dbdistinctreceiptponbrs($limit, $ponbr, true);
 			return $sortedresponse;
 		}
 		

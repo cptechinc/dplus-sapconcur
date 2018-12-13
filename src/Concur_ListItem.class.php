@@ -95,9 +95,6 @@
 			return $this->response['response'];
         }
 		
-		
-		
-		
         
 		/* =============================================================
 			ERROR CODES AND POSSIBLE SOLUTIONS

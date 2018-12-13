@@ -32,11 +32,11 @@
         
         
         public function import_concurpurchaseorders() {
-            // $this->get_extractinfo();
-            // $this->get_extractjobs();
-            // $this->get_jobstatus();
-            // $this->get_extractfile();
-            // $this->write_extractfile();
+            $this->get_extractinfo();
+            $this->get_extractjobs();
+            $this->get_jobstatus();
+            $this->get_extractfile();
+            $this->write_extractfile();
             $this->filename = $this->extract.".txt";
             $ponbrs = $this->parse_ponbrsfromcsv(); 
             $ponbrs_valid = $this->parse_ponbrs($ponbrs);

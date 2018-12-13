@@ -24,16 +24,16 @@
 					'Address2'          => array('dbcolumn' => 'billtoAddress2', 'required' => false),
 					'Address3'          => array('dbcolumn' => 'billtoAddress3', 'required' => false),
 					'City'              => array('dbcolumn' => 'billtoCity', 'required' => false, 'default' => 'N/A'),
-					'CountryCode'       => array('dbcolumn' => 'billtoCountryCode', 'required' => false),
+					'CountryCode'       => array('dbcolumn' => 'billtoCountryCode', 'required' => false, 'default' => 'N/A'),
 					'ExternalID'        => array('dbcolumn' => 'billtoID', 'required' => false),
 					'Name'              => array('dbcolumn' => 'billtoName', 'required' => false),
-					'PostalCode'        => array('dbcolumn' => 'billtoZip', 'required' => false),
-					'StateProvince'     => array('dbcolumn' => 'billtoState', 'required' => false)
+					'PostalCode'        => array('dbcolumn' => 'billtoZip', 'required' => false, 'default' => 'N/A'),
+					'StateProvince'     => array('dbcolumn' => 'billtoState', 'required' => false, 'default' => 'NA')
 				),
 				'CurrencyCode'        => array('dbcolumn' => '', 'required' => false, 'auto' => 'USD'),
 				'OrderDate'           => array('dbcolumn' => '', 'required' => false, 'format' => 'date', 'date-format' => 'Y-m-d'),
 				'ID'                  => array('dbcolumn' => 'PurchaseOrderNumber', 'required' => false),
-				'LedgerCode'          => array('dbcolumn' => '', 'required' => false),
+				'LedgerCode'          => array('dbcolumn' => '', 'required' => false, 'strlen' => 5),
 				'Name'                => array('dbcolumn' => 'PurchaseOrderNumber', 'required' => false),
 				'PolicyExternalID'    => array('dbcolumn' => '', 'required' => false),
 				'PurchaseOrderNumber' => array('dbcolumn' => '', 'required' => false),
@@ -167,7 +167,6 @@
 		/* =============================================================
 			CONCUR INTERFACE FUNCTIONS
 		============================================================ */
-		
 		/**
 		 * Verifies if Purchase Order Exists at Concur
 		 * @param  string $ponbr Purchase Order Number
@@ -189,6 +188,7 @@
 			$this->response = $this->curl_post($this->endpoints['purchase-order'], $purchaseorder, $json = true);
 			$this->response['response']['PurchaseOrderNumber'] = isset($this->response['response']['PurchaseOrderNumber']) ? $this->response['response']['PurchaseOrderNumber'] :  $purchaseorder['ID'];
 			$this->process_response();
+			//$this->response['response']['request'] = $purchaseorder;
 			return $this->response['response'];
 		}
 		
@@ -203,6 +203,7 @@
 			$this->response = $this->curl_put($this->endpoints['purchase-order'], $purchaseorder, $json = true);
 			$this->response['response']['PurchaseOrderNumber'] = isset($this->response['response']['PurchaseOrderNumber']) ? $this->response['response']['PurchaseOrderNumber'] :  $purchaseorder['ID'];
 			$this->process_response();
+			//$this->response['response']['request'] = $purchaseorder;
 			return $this->response['response'];
 		}
 		

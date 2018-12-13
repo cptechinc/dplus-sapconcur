@@ -1,5 +1,6 @@
 <?php
 	namespace Dplus\SapConcur;
+	use Purl\Url as Url;
 	
 	class Concur_Invoice extends Concur_Endpoint {
 		use StructuredClassTraits;
@@ -34,7 +35,7 @@
 				'Custom9'              => array('dbcolumn' => 'Location', 'required' => false),
 				'AmountWithoutVat'     => array('dbcolumn' => '', 'required' => false),
 				'PurchaseOrderNumber'  => array('dbcolumn' => '', 'required' => false),
-				'ID'  => array('dbcolumn' => '', 'required' => false),
+				'ID'                   => array('dbcolumn' => '', 'required' => false),
 				'VendorRemitAddress'  => array(
 					'Name'          => array('dbcolumn' => 'VendorName', 'required' => false),
 					'VendorCode'    => array('dbcolumn' => '', 'required' => false),
@@ -71,7 +72,7 @@
 		 */
 		public function get_invoice($invoiceID) {
 			$url = $this->endpoints['invoice'] . "/$invoiceID";
-			return $this->get_curl($url);
+			return $this->curl_get($url);
 		}
 		
 		/**
@@ -80,9 +81,9 @@
 		 * @return array         Response from Concur
 		 */
 		public function get_invoicescreatedafter($date) {
-			$url = new Purl\Url($this->endpoints['invoice']);
+			$url = new Url($this->endpoints['invoice']);
 			$url->query->set('createDateAfter', $date);
-			return $this->get_curl($url->getUrl());
+			return $this->curl_get($url->getUrl());
 		}
 		
 		/**
@@ -91,9 +92,9 @@
 		 * @return array         Response from Concur
 		 */
 		public function get_invoicescreatedbefore($date) {
-			$url = new Purl\Url($this->endpoints['invoice']);
+			$url = new Url($this->endpoints['invoice']);
 			$url->query->set('createDateBefore', $date);
-			return $this->get_curl($url->getUrl());
+			return $this->curl_get($url->getUrl());
 		}
 		
 		/* =============================================================
