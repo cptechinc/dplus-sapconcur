@@ -13,10 +13,10 @@
 		 */
 		protected $structure = array(
 			'header' => array(
-                'ID'         => array('dbcolumn' => 'concurID', 'required' => false),
-                'Level1Code' => array('dbcolumn' => 'ItemID', 'required' => false),
-                'listID'     => array('dbcolumn' => 'listID', 'required' => false),
-                'Name'       => array('dbcolumn' => 'ItemDescription', 'required' => false, 'strlen' => 64)
+                'ID'         => array('dbcolumn' => 'concurID'),
+                'Level1Code' => array('dbcolumn' => 'ItemID'),
+                'listID'     => array('dbcolumn' => 'listID'),
+                'Name'       => array('dbcolumn' => 'ItemDescription', 'strlen' => 64)
             )
 		);
 		

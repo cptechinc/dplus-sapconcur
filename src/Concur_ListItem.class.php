@@ -17,21 +17,21 @@
 		 */
 		protected $structure = array(
 			'header' => array(
-                'ID'          => array('dbcolumn' => '', 'required' => false),
-                'Level1Code'  => array('dbcolumn' => '', 'required' => false),
-                'Level2Code'  => array('dbcolumn' => '', 'required' => false),
-                'Level3Code'  => array('dbcolumn' => '', 'required' => false),
-                'Level4Code'  => array('dbcolumn' => '', 'required' => false),
-                'Level5Code'  => array('dbcolumn' => '', 'required' => false),
-                'Level6Code'  => array('dbcolumn' => '', 'required' => false),
-                'Level7Code'  => array('dbcolumn' => '', 'required' => false),
-                'Level8Code'  => array('dbcolumn' => '', 'required' => false),
-                'Level9Code'  => array('dbcolumn' => '', 'required' => false),
-                'Level10Code' => array('dbcolumn' => '', 'required' => false),
-                'listID'      => array('dbcolumn' => '', 'required' => false),
-                'Name'        => array('dbcolumn' => '', 'required' => false, 'strlen' => 64),
-                'ParentID'    => array('dbcolumn' => '', 'required' => false),
-                'URI'         => array('dbcolumn' => '', 'required' => false),
+                'ID'          => array(),
+                'Level1Code'  => array(),
+                'Level2Code'  => array(),
+                'Level3Code'  => array(),
+                'Level4Code'  => array(),
+                'Level5Code'  => array(),
+                'Level6Code'  => array(),
+                'Level7Code'  => array(),
+                'Level8Code'  => array(),
+                'Level9Code'  => array(),
+                'Level10Code' => array(),
+                'listID'      => array(),
+                'Name'        => array('strlen' => 64),
+                'ParentID'    => array(),
+                'URI'         => array(),
             )
 		);
 		

@@ -14,11 +14,11 @@
 		 */
 		protected $structure = array(
 			'header' => array(
-				'PurchaseOrderNumber' => array('dbcolumn' => '', 'required' => false),
-				'LineNumber'          => array('dbcolumn' => '', 'required' => false),
-				'LineItemExternalID'  => array('dbcolumn' => '', 'required' => false),
-				'ReceivedDate'        => array('dbcolumn' => '', 'required' => false, 'format' => 'date', 'date-format' => 'Y-m-d'),
-				'ReceivedQuantity'    => array('dbcolumn' => '', 'required' => false)
+				'PurchaseOrderNumber' => array(),
+				'LineNumber'          => array(),
+				'LineItemExternalID'  => array(),
+				'ReceivedDate'        => array('format' => 'date', 'date-format' => 'Y-m-d'),
+				'ReceivedQuantity'    => array()
 			)
 		);
 		

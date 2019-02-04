@@ -17,40 +17,40 @@
 		 */
 		protected $structure = array(
 			'header' => array(
-				'VendorCode' 						=> array('dbcolumn' => '', 'required' => false),
-				'VendorName' 						=> array('dbcolumn' => '', 'required' => false),
-				'AddressCode' 						=> array('dbcolumn' => '', 'required' => false),
-				'Address1' 							=> array('dbcolumn' => '', 'required' => false),
-				'Address2' 							=> array('dbcolumn' => '', 'required' => false),
-				'Address3' 							=> array('dbcolumn' => '', 'required' => false),
-				'City' 								=> array('dbcolumn' => '', 'required' => false),
-				'State' 							=> array('dbcolumn' => '', 'required' => false),
-				'PostalCode' 						=> array('dbcolumn' => '', 'required' => false),
-				'CountryCode' 						=> array('dbcolumn' => '', 'required' => false, 'strlen' => 2),
+				'VendorCode' 						=> array(),
+				'VendorName' 						=> array(),
+				'AddressCode' 						=> array(),
+				'Address1' 							=> array(),
+				'Address2' 							=> array(),
+				'Address3' 							=> array(),
+				'City' 								=> array(),
+				'State' 							=> array(),
+				'PostalCode' 						=> array(),
+				'CountryCode' 						=> array('strlen' => 2),
 				'Country' 							=> array('dbcolumn' => 'CountryCode', 'required' => false),
-				'Approved' 							=> array('dbcolumn' => '', 'required' => false),
-				'PaymentTerms' 						=> array('dbcolumn' => '', 'required' => false),
-				'AccountNumber' 					=> array('dbcolumn' => '', 'required' => false),
-				'TaxID' 							=> array('dbcolumn' => '', 'required' => false),
-				'ProvincialTaxID' 					=> array('dbcolumn' => '', 'required' => false),
-				'TaxType' 							=> array('dbcolumn' => '', 'required' => false),
-				'CurrencyCode' 						=> array('dbcolumn' => '', 'required' => false, 'default' => 'USD'),
-				'ShippingMethod' 					=> array('dbcolumn' => '', 'required' => false),
-				'ShippingTerms' 					=> array('dbcolumn' => '', 'required' => false),
-				'DiscountTermsDays' 				=> array('dbcolumn' => '', 'required' => false),
-				'DiscountPercentage' 				=> array('dbcolumn' => '', 'required' => false),
-				'ContactFirstName' 					=> array('dbcolumn' => '', 'required' => false),
-				'ContactLastName' 					=> array('dbcolumn' => '', 'required' => false),
-				'ContactPhoneNumber' 				=> array('dbcolumn' => '', 'required' => false),
-				'ContactEmail' 						=> array('dbcolumn' => '', 'required' => false),
-				'PurchaseOrderContactFirstName' 	=> array('dbcolumn' => '', 'required' => false),
-				'PurchaseOrderContactLastName' 		=> array('dbcolumn' => '', 'required' => false),
-				'PurchaseOrderContactPhoneNumber' 	=> array('dbcolumn' => '', 'required' => false),
-				'PurchaseOrderContactEmail' 		=> array('dbcolumn' => '', 'required' => false),
-				'DefaultEmployeeID' 				=> array('dbcolumn' => '', 'required' => false),
-				'DefaultExpenseTypeName' 			=> array('dbcolumn' => '', 'required' => false),
-				'PaymentMethodType' 				=> array('dbcolumn' => '', 'required' => false),
-				'AddressImportSyncID' 				=> array('dbcolumn' => '', 'required' => false)
+				'Approved' 							=> array(),
+				'PaymentTerms' 						=> array(),
+				'AccountNumber' 					=> array(),
+				'TaxID' 							=> array(),
+				'ProvincialTaxID' 					=> array(),
+				'TaxType' 							=> array(),
+				'CurrencyCode' 						=> array('default' => 'USD'),
+				'ShippingMethod' 					=> array(),
+				'ShippingTerms' 					=> array(),
+				'DiscountTermsDays' 				=> array(),
+				'DiscountPercentage' 				=> array(),
+				'ContactFirstName' 					=> array(),
+				'ContactLastName' 					=> array(),
+				'ContactPhoneNumber' 				=> array(),
+				'ContactEmail' 						=> array(),
+				'PurchaseOrderContactFirstName' 	=> array(),
+				'PurchaseOrderContactLastName' 		=> array(),
+				'PurchaseOrderContactPhoneNumber' 	=> array(),
+				'PurchaseOrderContactEmail' 		=> array(),
+				'DefaultEmployeeID' 				=> array(),
+				'DefaultExpenseTypeName' 			=> array(),
+				'PaymentMethodType' 				=> array(),
+				'AddressImportSyncID' 				=> array()
 			)
 		);
 		
@@ -167,10 +167,10 @@
 			$this->response = $this->curl_post($this->endpoints['vendor'], $body);
 			$this->response['response']['vendorID'] = $vendorID;
 			$this->process_response();
-			if (!$response['response']['error']) {
+			if (!$this->response['response']['error']) {
 				$this->log_sendlogvendor($vendorID) ;
 			}
-			return $response['response'];
+			return $this->response['response'];
 		}
 		
 		/**
@@ -195,7 +195,10 @@
 		/* =============================================================
 			INTERNAL CLASS FUNCTIONS
 		============================================================ */
-		protected function process_response($response) {
+		protected function process_response() {
+			if (!isset($this->response['response']['Message'])) {
+				$this->response['response']['Message'] = '';
+			}
 			if (strpos(strtolower($this->response['response']['Message']), 'missing' !== false)) {
 				$this->response['response']['error'] = true;
 				$this->log_error($this->response['response']['Message']);
@@ -272,7 +275,7 @@
 			
 			foreach ($vendorIDs as $vendorID) {
 				$vend_response = $this->create_vendor($vendorID);
-				$category = $vend_response['response']['error'] ? 'error' : 'success';
+				$category = $vend_response['error'] ? 'error' : 'success';
 				$responses[$category][] = $vend_response;
 			}
 			return $response;
