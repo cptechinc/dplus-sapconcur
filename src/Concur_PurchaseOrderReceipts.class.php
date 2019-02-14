@@ -17,7 +17,7 @@
 				'PurchaseOrderNumber' => array(),
 				'LineNumber'          => array(),
 				'LineItemExternalID'  => array(),
-				'ReceivedDate'        => array('format' => 'date', 'date-format' => 'Y-m-d'),
+				'ReceivedDate'        => array('dbcolumn' => 'ReceivedDate', 'format' => 'date', 'date-format' => 'Y-m-d'),
 				'ReceivedQuantity'    => array()
 			)
 		);
@@ -38,19 +38,19 @@
 		
 		/**
 		 * Gets all the PO Numbers
-		 * @param int     $limit Number of POs to do
-		 * @param string  $ponbr Purchase Order Number to start after
-		 * @return array         Generated Response
+		 * @param int     $limit   Number of POs to do
+		 * @param string  $afterpo Purchase Order Number to start after
+		 * @return array           Generated Response
 		 */
-		public function batch_addreceipts($limit = 0, $ponbr = '') {
-			$purchaseordernumbers = get_dbdistinctreceiptponbrs($limit, $ponbr);
+		public function batch_addreceipts($limit = 0, $afterpo = '') {
+			$purchaseordernumbers = get_dbdistinctreceiptponbrs($limit, $afterpo);
 			$response = $sortedresponse = array();
 			
 			foreach ($purchaseordernumbers as $ponbr) {
 				$response[$ponbr] = $this->add_receiptsforpo($ponbr);
 			}
 			$sortedresponse = $this->sort_response($response);
-			$sortedresponse['sql'] = get_dbdistinctreceiptponbrs($limit, $ponbr, true);
+			$sortedresponse['sql'] = get_dbdistinctreceiptponbrs($limit, $afterpo, true);
 			return $sortedresponse;
 		}
 		
@@ -110,8 +110,6 @@
 			return $response;
 		}
 		
-		
-		
 		/**
 		 * Processes Response and logs Errors if needed
 		 * @return void
@@ -121,12 +119,23 @@
 				$this->response['response']['Message'] = '';
 			}
 			
+			if (!isset($this->response['response']['Status'])) {
+				$this->response['response']['Status'] = '';
+			}
+			
 			if ($this->response['response']['error'] || $this->response['response']['Status'] == 'FAILURE') {
+				$this->response['response']['error'] = true;
+				$this->response['response']['Status'] = 'FAILURE';
 				$error = !empty($this->response['response']['ErrorCode']) ? "PO # ".$this->response['response']['PurchaseOrderNumber'] . " -> ErrorCode: " . $this->response['response']['ErrorCode'] . " -> " : '';
 				$error .= !empty($this->response['response']['ErrorMessage']) ? $this->response['response']['ErrorMessage'] : $this->response['response']['Message'];
 				$error .= " -> ";
 				$error .= !empty($this->response['response']['FieldCode']) ? "FieldCode: " . $this->response['response']['FieldCode'] : '';
 				$this->log_error($error);
-			} 
+			} elseif (isset($this->response['response']['Error']))  {
+				$this->response['response']['error'] = true;
+				$this->response['response']['Status'] = 'FAILURE';
+				$error = $this->response['response']['Error']['Message'] . " @ " . $this->response['response']['Error']['Server-Time'] . " ID: " . $this->response['response']['Error']['Id'];
+				$this->log_error($error);
+			}
 		}
 	}

@@ -176,8 +176,11 @@
 		protected function log_error($error) {
 			$date = date("Y-m-d h:m:s");
 			$class = get_class($this);
+			$ns = __NAMESPACE__.'\\Concur_';
+			$class = str_replace($ns, '', $class);
 			$message = "[{$date}] [{$class}] $error";
 			DplusWire::wire('log')->save('sap-errors', $message);
+			insert_errorlog($class, $error, $date);
 		}
 		
 		/**
