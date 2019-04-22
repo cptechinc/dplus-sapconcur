@@ -1,13 +1,13 @@
-<?php 
+<?php
 	namespace Dplus\SapConcur;
-	
+
 	class Concur_PurchaseOrderReceipts extends Concur_Endpoint {
 		use StructuredClassTraits;
-		
+
 		protected $endpoints = array(
 			'receipts' => 'https://www.concursolutions.com/api/v3.0/invoice/purchaseorderreceipts'
 		);
-		
+
 		/**
 		 * Structure of Purchase Order
 		 * @var array
@@ -21,9 +21,9 @@
 				'ReceivedQuantity'    => array()
 			)
 		);
-		
+
 		/**
-		 * Sends PUT Request to update a Purchase Order with receipt data 
+		 * Sends PUT Request to update a Purchase Order with receipt data
 		 * for a Purchase Order Line
 		 * @param string $ponbr      Purchase Order Number
 		 * @param int    $linenumber Line Number
@@ -35,7 +35,7 @@
 			$this->process_response();
 			return $this->response['response'];
 		}
-		
+
 		/**
 		 * Gets all the PO Numbers
 		 * @param int     $limit   Number of POs to do
@@ -45,7 +45,7 @@
 		public function batch_addreceipts($limit = 0, $afterpo = '') {
 			$purchaseordernumbers = get_dbdistinctreceiptponbrs($limit, $afterpo);
 			$response = $sortedresponse = array();
-			
+
 			foreach ($purchaseordernumbers as $ponbr) {
 				$response[$ponbr] = $this->add_receiptsforpo($ponbr);
 			}
@@ -53,7 +53,7 @@
 			$sortedresponse['sql'] = get_dbdistinctreceiptponbrs($limit, $afterpo, true);
 			return $sortedresponse;
 		}
-		
+
 		/**
 		 * Sorts reponses into two categories in array ok | failed
 		 * @param  array $response  Receipts send Response
@@ -61,7 +61,7 @@
 		 */
 		public function sort_response($response) {
 			$sortedresponse = array('failed' => array(), 'success' => array());
-			
+
 			foreach ($response as $ponbr => $purchaselines) {
 				foreach ($purchaselines as $linenbr => $line) {
 					if ($this->did_detailfail($line)) {
@@ -73,7 +73,7 @@
 			}
 			return $sortedresponse;
 		}
-		
+
 		/**
 		 * Returns if the Detail Response returned failture
 		 * @param  array $detail  Receipt Response
@@ -82,20 +82,20 @@
 		public function did_detailfail($detail) {
 			return ($detail['Status'] == 'FAILURE') ? true : false;
 		}
-		
+
 		/**
 		 * Adds receipts for specific Purchase Order Numbers
 		 * @param array $ponumbers Purchase Order Numbers
 		 */
 		public function add_receiptsforspecifiedpos($ponumbers) {
 			$response = array();
-			
+
 			foreach ($ponumbers as $ponbr) {
 				$response[$ponbr] = $this->add_receiptsforpo($ponbr);
 			}
 			return $response;
 		}
-		
+
 		/**
 		 * Adds all the receipts necessary for one Purchase Order
 		 * @param string $ponbr Purchase Order Number
@@ -103,13 +103,13 @@
 		public function add_receiptsforpo($ponbr) {
 			$receiptlines = get_dbreceiptslinenbrs($ponbr);
 			$response = array();
-			
+
 			foreach ($receiptlines as $linenumber) {
 				$response[$linenumber] = $this->add_receipt($ponbr, $linenumber);
 			}
 			return $response;
 		}
-		
+
 		/**
 		 * Processes Response and logs Errors if needed
 		 * @return void
@@ -118,11 +118,11 @@
 			if (!isset($this->response['response']['Message'])) {
 				$this->response['response']['Message'] = '';
 			}
-			
+
 			if (!isset($this->response['response']['Status'])) {
 				$this->response['response']['Status'] = '';
 			}
-			
+
 			if ($this->response['response']['error'] || $this->response['response']['Status'] == 'FAILURE') {
 				$this->response['response']['error'] = true;
 				$this->response['response']['Status'] = 'FAILURE';

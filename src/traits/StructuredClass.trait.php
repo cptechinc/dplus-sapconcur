@@ -1,13 +1,13 @@
-<?php 
+<?php
 	namespace Dplus\SapConcur;
-	
+
 	/**
 	 * Adds definition of Properties and functions needed
 	 * for endpoints that have defined structures
 	 */
 	trait StructuredClassTraits {
 		/**
-		 * Returns an array keyed by the keys and values needed for the array 
+		 * Returns an array keyed by the keys and values needed for the array
 		 * Takes the array structure, goes through the structure
 		 * adds a key value, and uses the dbcolumn property from the structure if needed
 		 * @param  array $structure       Section / Key of array to map
@@ -16,17 +16,19 @@
 		 */
 		protected function create_sectionarray($structure, $values) {
 			$structuredarray = array();
-			
+
 			foreach ($structure as $field => $fieldproperties) {
 				if (isset($fieldproperties['dbcolumn'])) {
 					$structuredarray[$field] = $this->get_value($values, $field, $fieldproperties);
-				} else {
+				} elseif (is_array($fieldproperties) && !empty($fieldproperties)) { // CHECK
 					$structuredarray[$field] = $this->create_sectionarray($structure[$field], $values);
+				} else {
+					$structuredarray[$field] = $this->get_value($values, $field, $fieldproperties);
 				}
 			}
 			return $structuredarray;
 		}
-		
+
 		/**
 		 * Returns a one-dimensional array with fields for keys and values (mainly for database)
 		 * @param  array  $structure Defined structure to loop through keys
@@ -35,20 +37,20 @@
 		 */
 		protected function create_dbarray($structure, $values) {
 			$structuredarray = array();
-			
+
 			foreach ($structure as $field => $properties) {
 				$column = !empty($properties['dbcolumn']) ? $properties['dbcolumn'] : $field;
-				
+
 				if (is_array($values[$field])) {
 					$structuredarray = array_merge($structuredarray, $this->create_dbarray($structure[$field], $values[$field]));
 				} else {
 					$structuredarray[$column] = $this->get_dbvalue($values, $field, $properties);
 				}
-				
+
 			}
 			return $structuredarray;
 		}
-		
+
 		/**
 		 * Determines the Value to get
 		 * @param  array  $values          Array of Values, Key value array
@@ -56,12 +58,17 @@
 		 * @param  array  $fieldproperties Array of Properties for that field
 		 * @return string                  Determined Value, formatted
 		 */
-		protected function get_value($values, $field, $fieldproperties) {
+		protected function get_value($values, $field, $fieldproperties) {;
 			$field = !empty($fieldproperties['dbcolumn']) ? $fieldproperties['dbcolumn'] : $field;
 			$value = isset($values[$field]) ? $values[$field] : '';
-			return $this->format_value($value, $fieldproperties);
+
+			if (!empty($fieldproperties)) {
+				return $this->format_value($value, $fieldproperties);
+			} else {
+				return $this->clean_value($value);
+			}
 		}
-		
+
 		/**
 		 * Returns the value from the values array, does not use the dbcolumn
 		 * @param  array  $values          Values
@@ -72,7 +79,7 @@
 		protected function get_dbvalue($values, $field, $fieldproperties) {
 			return $this->format_value($values[$field], $fieldproperties);
 		}
-		
+
 		/**
 		 * Formats the value of a field using the field properties array
 		 * @param  mixed $value            Value to format
@@ -91,11 +98,10 @@
 			} else {
 				$value = $this->clean_value($value);
 			}
-			
+
 			if (isset($fieldproperties['auto'])) {
 				$value = $this->clean_value($fieldproperties['auto']);
 			}
-			
 			return (empty($value) && isset($fieldproperties['default'])) ? $fieldproperties['default'] : $value;
 		}
 	}

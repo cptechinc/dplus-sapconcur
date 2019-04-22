@@ -1,17 +1,17 @@
 <?php
 	namespace Dplus\SapConcur;
-	
+
 	use Purl\Url as Url;
 	use Dplus\Base\Validator;
-	
+
 	class Concur_Invoice extends Concur_Endpoint {
 		use StructuredClassTraits;
-		
+
 		protected $endpoints = array(
 			'invoice-search' => 'https://www.concursolutions.com/api/v3.0/invoice/paymentrequestdigests',
 			'invoice'        => 'https://www.concursolutions.com/api/v3.0/invoice/paymentrequest'
 		);
-		
+
 		/**
 		 * Structure of Purchase Order
 		 * @var array
@@ -63,7 +63,7 @@
 				'PurchaseOrderNumber'      => array()
 			)
 		);
-		
+
 		/* =============================================================
 			CONCUR INTERFACE FUNCTIONS
 		============================================================ */
@@ -77,7 +77,7 @@
 			$response = $this->curl_get($url);
 			return $response['response'];
 		}
-		
+
 		/**
 		 * Sends GET Request to retreive Invoice IDs created after $date
 		 * // Example URL https://www.concursolutions.com/api/v3.0/invoice/paymentrequestdigests/?createDateAfter=2018-01-01
@@ -92,7 +92,40 @@
 			$response = $this->curl_get($url->getUrl());
 			return $response['response'];
 		}
-		
+
+		/**
+		 * Sends GET Request to retreive Invoice IDs modified after $date
+		 * // Example URL https://www.concursolutions.com/api/v3.0/invoice/paymentrequestdigests/?createDateAfter=2018-01-01
+		 * @param  string $date Date to start looking for invoices in YYYY-MM-DD Format
+		 * @param  string $url  URL FROM Next Page response
+		 * @return array        Response from Concur
+		 */
+		public function get_invoiceIDs_modified_after($date, $url = '') {
+			$date = $this->convert_date($date);
+			$url = !empty($url) ? new Url($url) : new Url($this->endpoints['invoice-search']);
+			$url->query->set('lastModifiedDateAfter', $date);
+			$response = $this->curl_get($url->getUrl());
+			return $response['response'];
+		}
+
+		/**
+		 * Sends GET Request to retreive Invoice IDs modified after $date
+		 * // Example URL https://www.concursolutions.com/api/v3.0/invoice/paymentrequestdigests/?createDateAfter=2018-01-01
+		 * @param  string $date Date to start looking for invoices in YYYY-MM-DD Format
+		 * @param  string $url  URL FROM Next Page response
+		 * @return array        Response from Concur
+		 */
+		public function get_invoiceIDs_modified_before($date, $url = '') {
+			$date = $this->convert_date($date);
+			$url = !empty($url) ? new Url($url) : new Url($this->endpoints['invoice-search']);
+			$url->query->set('lastModifiedDateBefore', $date);
+			$url->query->set('approvalStatus', 'R_ACCO');
+			$response = $this->curl_get($url->getUrl());
+			return $response['response'];
+		}
+
+
+
 		/**
 		 * Sends GET Request to retreive Invoices created after X date
 		 * @param  string $date  Date YYYY-MM-DD
@@ -101,15 +134,32 @@
 		public function get_all_invoiceIDs_created_after($date) {
 			$response = $this->get_invoiceIDs_created_after($date);
 			$invoiceIDs = array_column($response['PaymentRequestDigest'], 'ID');
-			
+
 			while (!empty($response['NextPage'])) {
 				$response = $this->get_invoiceIDs_created_after($date, $response['NextPage']);
 				$invoiceIDs = array_merge($invoiceIDs, array_column($response['PaymentRequestDigest'], 'ID'));
 			}
-			
+
 			return $invoiceIDs;
 		}
-		
+
+		/**
+		 * Sends GET Request to retreive Invoices created after X date
+		 * @param  string $date  Date YYYY-MM-DD
+		 * @return array         Response from Concur
+		 */
+		public function get_all_invoiceIDs_modified_after($date) {
+			$response = $this->get_invoiceIDs_modified_after($date);
+			$invoiceIDs = array_column($response['PaymentRequestDigest'], 'ID');
+
+			while (!empty($response['NextPage'])) {
+				$response = $this->get_invoiceIDs_modified_after($date, $response['NextPage']);
+				$invoiceIDs = array_merge($invoiceIDs, array_column($response['PaymentRequestDigest'], 'ID'));
+			}
+
+			return $invoiceIDs;
+		}
+
 		/**
 		 * Imports the Invoices created after $date
 		 * @param  string $date Date
@@ -118,7 +168,7 @@
 		public function get_invoices_created_after($date) {
 			$invoiceIDs = $this->get_all_invoiceIDs_created_after($date);
 			$invoices = array();
-			
+
 			foreach ($invoiceIDs as $invoiceID) {
 				$invoice = $this->get_invoice($invoiceID);
 				$invoice = $this->process_invoice($invoice);
@@ -127,7 +177,25 @@
 			}
 			return $invoices;
 		}
-		
+
+		/**
+		 * Imports the Invoices created after $date
+		 * @param  string $date Date
+		 * @return array        Invoices that were imported
+		 */
+		public function get_invoices_modified_after($date) {
+			$invoiceIDs = $this->get_all_invoiceIDs_modfied_after($date);
+			$invoices = array();
+
+			foreach ($invoiceIDs as $invoiceID) {
+				$invoice = $this->get_invoice($invoiceID);
+				$invoice = $this->process_invoice($invoice);
+				$this->write_dbinvoice($invoice);
+				$invoices[$invoice['InvoiceNumber']] = $invoice;
+			}
+			return $invoices;
+		}
+
 		/**
 		 * Sends GET Request to retreive Invoice IDs created before $date
 		 * // Example URL https://www.concursolutions.com/api/v3.0/invoice/paymentrequestdigests/?createDateBefore=2018-01-01
@@ -142,7 +210,7 @@
 			$response = $this->curl_get($url->getUrl());
 			return $response['response'];
 		}
-		
+
 		/**
 		 * Sends GET Request to retreive Invoices created befre X date
 		 * @param  string $date  Date YYYY-MM-DD
@@ -151,14 +219,14 @@
 		public function get_all_invoiceIDs_created_before($date) {
 			$response = $this->get_invoiceIDs_created_before($date);
 			$invoiceIDs = array_column($response['PaymentRequestDigest'], 'ID');
-			
+
 			while (!empty($response['NextPage'])) {
 				$response = $this->get_invoiceIDs_created_before($date, $response['NextPage']);
 				$invoiceIDs = array_merge($invoiceIDs, array_column($response['PaymentRequestDigest'], 'ID'));
 			}
 			return $invoiceIDs;
 		}
-		
+
 		/**
 		 * Imports the Invoices created before $date
 		 * @param  string $date Date
@@ -175,7 +243,7 @@
 			}
 			return $invoices;
 		}
-		
+
 		/**
 		 * Converts Date to YYYY-MM-DD Format, will use today's date if empty
 		 * @param  string $date YYYY-MM-DD
@@ -186,7 +254,7 @@
 			$date = !empty($date) ? $date : date('Y-m-d');
 			return $validator->date_yyyymmdd_dashed($date) ? $date : date('Y-m-d', strtotime($date));
 		}
-		
+
 		/* =============================================================
 			DATABASE FUNCTIONS
 		============================================================ */
@@ -207,7 +275,7 @@
 			}
 			return $result;
 		}
-		
+
 		/**
 		 * Inserts invoice detail line for Invoice
 		 * @param  string $invnbr Invoice Number
@@ -218,7 +286,7 @@
 		public function insert_dbinvoiceline($invnbr, $line, $debug = false) {
 			$invoiceline = $this->create_dbarray($this->structure['detail'], $line);
 			$result = false;
-			
+
 			if (does_dbinvoicelineexist($invnbr, $invoiceline['RequestLineItemNumber'])) {
 				$result = update_dbinvoiceline($invnbr, $invoiceline, $debug);
 			} else {
@@ -228,13 +296,13 @@
 			}
 			return $result;
 		}
-		
+
 		/* =============================================================
 			CLASS INTERFACE FUNCTIONS
 		============================================================ */
 		protected function process_invoice(array $invoice) {
 			$i = 0;
-			
+
 			foreach ($invoice['LineItems']['LineItem'] as $line) {
 				$invoice['LineItems']['LineItem'][$i]['PurchaseOrderNumber'] = !empty($line['PurchaseOrderNumber']) ? $line['PurchaseOrderNumber'] : $invoice['PurchaseOrderNumber'];
 				$i++;

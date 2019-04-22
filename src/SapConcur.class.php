@@ -1,33 +1,33 @@
-<?php 
+<?php
 	namespace Dplus\SapConcur;
-	
+
 	use Dplus\ProcessWire\DplusWire;
-	
+
 	/**
 	 * Template Class to build endpoint classes from and extend
 	 */
 	abstract class Concur_Endpoint {
 		use \Dplus\Base\MagicMethodTraits;
 		use \Dplus\Base\ThrowErrorTrait;
-		
+
 		/**
 		 * List of URL Endpoints
 		 * @var array
 		 */
 		protected $endpoints;
-		
+
 		/**
 		 * Response from cURL or Endpoint
 		 * @var array
 		 */
 		protected $response;
-		
+
 		/**
 		 * Request Body for cURL
 		 * @var array
 		 */
 		protected $request;
-		
+
 		/**
 		 * Sends POST cURL request
 		 * @param  string $url  URL to make request to
@@ -42,7 +42,7 @@
 			$curl->authentication->set_accesstoken($this->get_accesstoken());
 			return $curl->post($url, $body);
 		}
-		
+
 		/**
 		 * Sends PUT cURL request
 		 * @param  string $url  URL to make request to
@@ -57,7 +57,7 @@
 			$curl->authentication->set_accesstoken($this->get_accesstoken());
 			return $curl->put($url, $body);
 		}
-		
+
 		/**
 		 * Sends GET cURL request
 		 * @param  string $url  URL to make request to
@@ -72,7 +72,7 @@
 			$curl->authentication->set_accesstoken($this->get_accesstoken());
 			return $curl->get($url, $body);
 		}
-		
+
 		/**
 		 * Sends GET cURL request
 		 * @param  string $url  URL to make request to
@@ -99,7 +99,7 @@
 			curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "GET");
 			return $this->execute_andgetresponse($curl);
 		}
-		
+
 		/**
 		 * Creates the default HTTP HEADERS Array used for cURL
 		 * // NOTE IT REAUTHENTICATES IF TOKEN HAS EXPIRED
@@ -117,7 +117,7 @@
 				"Authorization: Bearer $accesstoken"
 			];
 		}
-		
+
 		protected function get_accesstoken() {
 			if (strtotime('now') > Concur_Authentication::$tokenexpires) {
 				$authentication = new Concur_Authentication();
@@ -125,7 +125,7 @@
 			}
 			return Concur_Authentication::$authtoken;
 		}
-		
+
 		/**
 		 * Initializes and sets the default options for a cURL Resource
 		 * @param  string $url     URL to send cURL request
@@ -141,7 +141,7 @@
 			));
 			return $curl;
 		}
-		
+
 		/**
 		 * Executes cURL Requests and Handles the response
 		 * to set the $this->response property and to return it
@@ -152,7 +152,7 @@
 			$this->response = json_decode(curl_exec($curl), true);
 			$curlinfo = curl_getinfo($curl);
 			$this->response['http_code'] = $curlinfo['http_code'];
-			
+
 			if ($this->response) {
 				if (!isset($this->response['error'])) {
 					$this->response['error'] = false;
@@ -167,7 +167,7 @@
 			}
 			return $this->response;
 		}
-		
+
 		/**
 		 * Writes to Error Log
 		 * @param  string $error Error Message
@@ -182,7 +182,7 @@
 			DplusWire::wire('log')->save('sap-errors', $message);
 			insert_errorlog($class, $error, $date);
 		}
-		
+
 		/**
 		 * Cleanses the value using str_replace
 		 * @param  string $value string
