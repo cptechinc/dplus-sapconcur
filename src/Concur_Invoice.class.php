@@ -104,6 +104,7 @@
 			$date = $this->convert_date($date);
 			$url = !empty($url) ? new Url($url) : new Url($this->endpoints['invoice-search']);
 			$url->query->set('lastModifiedDateAfter', $date);
+			$url->query->set('approvalStatus', 'R_APPR');
 			$response = $this->curl_get($url->getUrl());
 			return $response['response'];
 		}
@@ -119,7 +120,7 @@
 			$date = $this->convert_date($date);
 			$url = !empty($url) ? new Url($url) : new Url($this->endpoints['invoice-search']);
 			$url->query->set('lastModifiedDateBefore', $date);
-			$url->query->set('approvalStatus', 'R_ACCO');
+			$url->query->set('approvalStatus', 'R_APPR');
 			$response = $this->curl_get($url->getUrl());
 			return $response['response'];
 		}
@@ -184,7 +185,7 @@
 		 * @return array        Invoices that were imported
 		 */
 		public function get_invoices_modified_after($date) {
-			$invoiceIDs = $this->get_all_invoiceIDs_modfied_after($date);
+			$invoiceIDs = $this->get_all_invoiceIDs_modified_after($date);
 			$invoices = array();
 
 			foreach ($invoiceIDs as $invoiceID) {
