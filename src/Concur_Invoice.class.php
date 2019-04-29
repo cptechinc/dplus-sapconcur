@@ -125,8 +125,6 @@
 			return $response['response'];
 		}
 
-
-
 		/**
 		 * Sends GET Request to retreive Invoices created after X date
 		 * @param  string $date  Date YYYY-MM-DD
@@ -162,6 +160,23 @@
 		}
 
 		/**
+		 * Sends GET Request to retreive Invoices created after X date
+		 * @param  string $date  Date YYYY-MM-DD
+		 * @return array         Response from Concur
+		 */
+		public function get_all_invoiceIDs_modified_before($date) {
+			$response = $this->get_invoiceIDs_modified_before($date);
+			$invoiceIDs = array_column($response['PaymentRequestDigest'], 'ID');
+
+			while (!empty($response['NextPage'])) {
+				$response = $this->get_invoiceIDs_modified_before($date, $response['NextPage']);
+				$invoiceIDs = array_merge($invoiceIDs, array_column($response['PaymentRequestDigest'], 'ID'));
+			}
+
+			return $invoiceIDs;
+		}
+
+		/**
 		 * Imports the Invoices created after $date
 		 * @param  string $date Date
 		 * @return array        Invoices that were imported
@@ -186,6 +201,24 @@
 		 */
 		public function get_invoices_modified_after($date) {
 			$invoiceIDs = $this->get_all_invoiceIDs_modified_after($date);
+			$invoices = array();
+
+			foreach ($invoiceIDs as $invoiceID) {
+				$invoice = $this->get_invoice($invoiceID);
+				$invoice = $this->process_invoice($invoice);
+				$this->write_dbinvoice($invoice);
+				$invoices[$invoice['InvoiceNumber']] = $invoice;
+			}
+			return $invoices;
+		}
+
+		/**
+		 * Imports the Invoices created after $date
+		 * @param  string $date Date
+		 * @return array        Invoices that were imported
+		 */
+		public function get_invoices_modified_before($date) {
+			$invoiceIDs = $this->get_all_invoiceIDs_modified_before($date);
 			$invoices = array();
 
 			foreach ($invoiceIDs as $invoiceID) {
@@ -236,6 +269,7 @@
 		public function get_invoices_created_before($date) {
 			$invoiceIDs = $this->get_all_invoiceIDs_created_before($date);
 			$invoices = array();
+
 			foreach ($invoiceIDs as $invoiceID) {
 				$invoice = $this->get_invoice($invoiceID);
 				$invoice = $this->process_invoice($invoice);
